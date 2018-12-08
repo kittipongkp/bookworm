@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Form, Button } from 'semantic-ui-react'
+import Validator from 'validator';
+import InlineError from '../messages/InlineError';
 
 class LoginForm extends Component {
 
@@ -16,36 +19,56 @@ class LoginForm extends Component {
     
     
 
-    onSubmit = (e) => {}
+    onSubmit = () => {
+        const errors = this.validate(this.state.data);
+        this.setState({errors});
+        if(Object.keys(errors).length === 0){
+            this.props.submit(this.state.data);
+        }
+    }
+
+    validate=(data)=>{
+        const errors={};
+        if(!Validator.isEmail(data.email)) errors.email="ข้อมูลที่ใส่ไม่ใช้อีเมล";
+        if(!data.password) errors.password="ไม่สามรถเป็นค่าว่างได้";
+       // console.log(errors.email);
+        return errors;
+    }
     
      
     render() {
-        const {data} = this.state;
+        const {data, errors} = this.state;
+       
         return (
             <Form onSubmit={this.onSubmit}>
-                <Form.Field>
+                <Form.Field error={!!errors.email}>
                     <label htmlFor="email">Email</label>
-                    <input type="email" 
+                    <input type="text" 
                         id="email" 
                         name='email' 
                         placeholder="example@example.com" 
                         value={data.email} 
                         onChange={this.onChange} />
+                        {errors.email && <InlineError text={errors.email} />}
                 </Form.Field>
-                <Form.Field>
-                    <label htmlFor="password">Email</label>
+                <Form.Field error={!!errors.password}>
+                    <label htmlFor="password">Password</label>
                     <input type="password" 
                         id="password" 
                         name='password' 
                         placeholder="Make it secure" 
-                        value={data.email} 
+                        value={data.password} 
                         onChange={this.onChange} />
+                        {errors.password && <InlineError text={errors.password} />}
                 </Form.Field>
                 
                 <Button primary>Login</Button>
             </Form>
         );
     }
+}
+LoginForm.propTypes = {
+   submit: PropTypes.func.isRequired
 }
 
 export default LoginForm;
